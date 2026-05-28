@@ -1,14 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { Validator } from "@/components/Validator";
-import { EmptyResultPanel } from "@/components/ResultPanel";
+import { EmptyResultPanel, ResultPanel } from "@/components/ResultPanel";
 import { TrustBanner } from "@/components/TrustBanner";
 import { FooterFunnel } from "@/components/FooterFunnel";
 import { STRINGS, type Lang } from "@/lib/strings";
 import { SAMPLE_BODY, SAMPLE_SECRET } from "@/lib/sample";
+import {
+  countEventTypes,
+  tryParseJson,
+  validate as runValidate,
+  type ValidationResult,
+} from "@/lib/validate";
 
 export default function Home() {
   const [lang, setLang] = useState<Lang>("en");
@@ -16,6 +22,7 @@ export default function Home() {
   const [sig, setSig] = useState("");
   const [secret, setSecret] = useState(SAMPLE_SECRET);
   const [showSecret, setShowSecret] = useState(false);
+  const [result, setResult] = useState<ValidationResult | null>(null);
 
   const L = STRINGS[lang];
 
@@ -23,6 +30,7 @@ export default function Home() {
     setBody(SAMPLE_BODY);
     setSecret(SAMPLE_SECRET);
     setSig("");
+    setResult(null);
   };
   const breakIt = () => {
     if (!sig) return;
@@ -37,6 +45,15 @@ export default function Home() {
     for (let i = 0; i < 32; i++) s += hex[Math.floor(Math.random() * 16)];
     setSecret(s);
   };
+
+  const onValidate = useCallback(async () => {
+    if (!sig || !secret) return;
+    const r = await runValidate(body, sig, secret);
+    setResult(r);
+  }, [body, sig, secret]);
+
+  const parsed = useMemo(() => tryParseJson(body), [body]);
+  const eventTypeCounts = useMemo(() => countEventTypes(parsed), [parsed]);
 
   return (
     <div className="min-h-screen w-full">
@@ -58,11 +75,22 @@ export default function Home() {
             useSample={useSample}
             breakIt={breakIt}
             randomSecret={randomSecret}
+            onValidate={onValidate}
             canValidate={!!sig && !!secret}
           />
         </section>
         <section className="lg:col-span-2">
-          <EmptyResultPanel L={L} />
+          {result ? (
+            <ResultPanel
+              L={L}
+              result={result}
+              parsed={parsed}
+              eventTypeCounts={eventTypeCounts}
+              body={body}
+            />
+          ) : (
+            <EmptyResultPanel L={L} />
+          )}
         </section>
       </main>
 

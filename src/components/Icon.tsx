@@ -57,6 +57,11 @@ export const Icon = {
       <polygon points="6 4 20 12 6 20 6 4" />
     </svg>
   ),
+  ChevronRight: (p: IconProps) => (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...p}>
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  ),
   Shuffle: (p: IconProps) => (
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}>
       <polyline points="16 3 21 3 21 8" />
