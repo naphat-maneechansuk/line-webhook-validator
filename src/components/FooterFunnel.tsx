@@ -55,7 +55,7 @@ export function FooterFunnel({ L }: { L: Strings }) {
   return (
     <footer className="border-t border-ink-800 mt-4">
       <div className="max-w-[1180px] mx-auto px-6 md:px-8 py-10">
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-1 gap-4">
           <FunnelCard
             label="docs"
             title={L.footStruggle}
@@ -63,32 +63,20 @@ export function FooterFunnel({ L }: { L: Strings }) {
             sub="Trailing newlines, base64-vs-hex, wrong access tokens — the usual suspects, with copy-paste fixes."
             tone="amber"
           />
-          <FunnelCard
-            label="consult"
-            title={L.footStuck}
-            cta={L.footStuckCta}
-            sub="A 30-min Zoom with someone who's shipped 50+ LINE OA bots. No sales — just an answer."
-            tone="line"
-          />
         </div>
         <div className="mt-8 pt-6 border-t border-ink-800 flex flex-wrap items-center justify-between gap-3 text-[12px] text-ink-400">
           <div className="flex items-center gap-3">
             <Logo />
-            <span className="font-mono">v1.2.0</span>
-            <span>·</span>
             <span>MIT licensed</span>
             <span>·</span>
-            <a href="#" className="hover:text-ink-200">
-              Changelog
-            </a>
-            <span>·</span>
-            <a href="#" className="hover:text-ink-200">
+            <a
+              href="https://github.com/naphat-maneechansuk/line-webhook-validator/issues"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-ink-200"
+            >
               Report an issue
             </a>
-          </div>
-          <div className="font-mono">
-            <span className="text-ink-500">built by</span>{" "}
-            <span className="text-ink-200">@line-oa-tools</span>
           </div>
         </div>
       </div>

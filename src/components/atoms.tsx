@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { InfoTip } from "./InfoTip";
 
 type PillTone =
   | "slate"
@@ -45,10 +46,12 @@ export function FieldLabel({
   children,
   hint,
   right,
+  tip,
 }: {
   children: ReactNode;
   hint?: ReactNode;
   right?: ReactNode;
+  tip?: string;
 }) {
   return (
     <div className="mb-1.5">
@@ -57,6 +60,7 @@ export function FieldLabel({
           <div className="text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ink-200 whitespace-nowrap">
             {children}
           </div>
+          {tip && <InfoTip text={tip} />}
         </div>
         <div className="text-[11px] text-ink-400 flex-none whitespace-nowrap">
           {right}

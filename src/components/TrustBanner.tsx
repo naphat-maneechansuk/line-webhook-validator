@@ -15,7 +15,9 @@ export function TrustBanner({ L }: { L: Strings }) {
           <span>{L.trust}</span>
         </div>
         <a
-          href="#"
+          href="https://github.com/naphat-maneechansuk/line-webhook-validator"
+          target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 text-ink-200 hover:text-ink-100 font-medium"
         >
           <Icon.Github /> {L.viewSource} <Icon.Arrow />

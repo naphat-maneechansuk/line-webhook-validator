@@ -51,7 +51,9 @@ export function Header({
             ))}
           </div>
           <a
-            href="#"
+            href="https://github.com/naphat-maneechansuk/line-webhook-validator"
+            target="_blank"
+            rel="noopener noreferrer"
             className="ml-1 inline-flex items-center justify-center w-8 h-8 rounded-md border border-ink-700 bg-ink-850 text-ink-200 hover:text-ink-100 hover:border-ink-600 transition"
             aria-label="GitHub"
           >

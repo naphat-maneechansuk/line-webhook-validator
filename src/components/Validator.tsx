@@ -77,6 +77,7 @@ export function Validator({
       <div>
         <FieldLabel
           hint={L.bodyHint}
+          tip={L.bodyTip}
           right={
             <span className="font-mono">
               {bodyBytes} {L.bytes}
@@ -91,6 +92,7 @@ export function Validator({
       <div className="mt-5">
         <FieldLabel
           hint={L.sigHint}
+          tip={L.sigTip}
           right={<span className="font-mono">{sig.length} chars</span>}
         >
           {L.sig}
@@ -105,6 +107,7 @@ export function Validator({
       <div className="mt-5">
         <FieldLabel
           hint={L.secretHint}
+          tip={L.secretTip}
           right={<span className="font-mono">{secret.length} chars</span>}
         >
           {L.secret}
