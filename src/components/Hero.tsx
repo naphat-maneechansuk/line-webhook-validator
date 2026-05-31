@@ -6,7 +6,6 @@ export function Hero({ L }: { L: Strings }) {
   return (
     <section className="max-w-[1180px] mx-auto px-6 md:px-8 pt-12 pb-8">
       <div className="flex items-center gap-2 mb-4">
-        <Pill tone="line">v1.2</Pill>
         <Pill tone="slate">
           <Icon.Lock /> client-side only
         </Pill>
