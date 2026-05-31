@@ -71,7 +71,7 @@ export function PrettyJson({
     return null;
   };
   return (
-    <pre className="font-mono text-[12.5px] leading-relaxed overflow-x-auto whitespace-pre m-0">
+    <pre className="font-mono text-[12.5px] leading-relaxed whitespace-pre-wrap break-all m-0">
       {render(data)}
     </pre>
   );
