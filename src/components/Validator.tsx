@@ -18,6 +18,8 @@ export function Validator({
   randomSecret,
   onValidate,
   canValidate,
+  canBreak,
+  hasResult,
 }: {
   L: Strings;
   body: string;
@@ -33,11 +35,21 @@ export function Validator({
   randomSecret: () => void;
   onValidate?: () => void;
   canValidate: boolean;
+  canBreak: boolean;
+  hasResult?: boolean;
 }) {
   const bodyBytes = useMemo(
     () => new TextEncoder().encode(body).length,
     [body],
   );
+  const parseError = useMemo<string | null>(() => {
+    try {
+      JSON.parse(body);
+      return null;
+    } catch (e) {
+      return e instanceof Error ? e.message : String(e);
+    }
+  }, [body]);
 
   return (
     <div className="rounded-xl border border-ink-750 bg-ink-900/80 p-6 md:p-7">
@@ -52,21 +64,22 @@ export function Validator({
           <button
             type="button"
             onClick={useSample}
-            className="text-[11.5px] px-2.5 h-7 rounded-md bg-ink-800 hover:bg-ink-750 text-ink-200 border border-ink-700"
+            className="whitespace-nowrap text-[11.5px] px-2.5 h-7 rounded-md bg-ink-800 hover:bg-ink-750 text-ink-200 border border-ink-700 transition"
           >
             {L.useSample}
           </button>
           <button
             type="button"
             onClick={breakIt}
-            className="text-[11.5px] px-2.5 h-7 rounded-md bg-ink-800 hover:bg-ink-750 text-ink-200 border border-ink-700"
+            disabled={!canBreak}
+            className="whitespace-nowrap text-[11.5px] px-2.5 h-7 rounded-md bg-ink-800 hover:bg-ink-750 text-ink-200 border border-ink-700 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-ink-800"
           >
             {L.breakIt}
           </button>
           <button
             type="button"
             onClick={randomSecret}
-            className="text-[11.5px] px-2.5 h-7 rounded-md bg-ink-800 hover:bg-ink-750 text-ink-200 border border-ink-700 inline-flex items-center gap-1.5"
+            className="whitespace-nowrap text-[11.5px] px-2.5 h-7 rounded-md bg-ink-800 hover:bg-ink-750 text-ink-200 border border-ink-700 inline-flex items-center gap-1.5 transition"
           >
             <Icon.Shuffle />
             {L.resetSecret}
@@ -87,6 +100,14 @@ export function Validator({
           {L.body}
         </FieldLabel>
         <Textarea value={body} onChange={setBody} rows={11} />
+        {parseError && (
+          <div
+            role="alert"
+            className="mt-1.5 text-[11.5px] text-rose-300 font-mono flex items-center gap-1.5"
+          >
+            <Icon.Alert width="12" height="12" /> Invalid JSON: {parseError}
+          </div>
+        )}
       </div>
 
       <div className="mt-5">
@@ -161,11 +182,11 @@ export function Validator({
         <button
           type="button"
           onClick={onValidate}
-          disabled={!canValidate}
+          disabled={!canValidate || !!parseError}
           className="inline-flex items-center gap-2 h-11 px-5 rounded-lg font-semibold text-ink-950 bg-line hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
           <Icon.Play />
-          <span>{L.validate}</span>
+          <span>{hasResult ? L.revalidate : L.validate}</span>
         </button>
         <div className="text-[12px] text-ink-400 font-mono">
           <span className="text-ink-500">$</span> hmac-sha256(secret, body) |

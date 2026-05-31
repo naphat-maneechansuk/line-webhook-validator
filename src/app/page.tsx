@@ -9,6 +9,7 @@ import { TrustBanner } from "@/components/TrustBanner";
 import { FooterFunnel } from "@/components/FooterFunnel";
 import { STRINGS, type Lang } from "@/lib/strings";
 import { SAMPLE_BODY, SAMPLE_SECRET } from "@/lib/sample";
+import { hmacSha256 } from "@/lib/hmac";
 import {
   countEventTypes,
   tryParseJson,
@@ -26,10 +27,11 @@ export default function Home() {
 
   const L = STRINGS[lang];
 
-  const useSample = () => {
+  const useSample = async () => {
     setBody(SAMPLE_BODY);
     setSecret(SAMPLE_SECRET);
-    setSig("");
+    const { base64 } = await hmacSha256(SAMPLE_SECRET, SAMPLE_BODY);
+    setSig(base64);
     setResult(null);
   };
   const breakIt = () => {
@@ -38,12 +40,15 @@ export default function Home() {
     const i = Math.floor(arr.length / 2);
     arr[i] = arr[i] === "A" ? "B" : "A";
     setSig(arr.join(""));
+    setResult(null);
   };
   const randomSecret = () => {
     const hex = "0123456789abcdef";
     let s = "";
     for (let i = 0; i < 32; i++) s += hex[Math.floor(Math.random() * 16)];
     setSecret(s);
+    setSig("");
+    setResult(null);
   };
 
   const onValidate = useCallback(async () => {
@@ -72,11 +77,15 @@ export default function Home() {
             setSecret={setSecret}
             showSecret={showSecret}
             setShowSecret={setShowSecret}
-            useSample={useSample}
+            useSample={() => {
+              void useSample();
+            }}
             breakIt={breakIt}
             randomSecret={randomSecret}
             onValidate={onValidate}
             canValidate={!!sig && !!secret}
+            canBreak={!!sig}
+            hasResult={!!result}
           />
         </section>
         <section className="lg:col-span-2">
