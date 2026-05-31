@@ -1,0 +1,227 @@
+export const metadata = {
+  title: "InvalidSignatureError on LINE webhook — 7 root causes and fixes",
+  description:
+    "Why your LINE webhook keeps throwing InvalidSignatureError, and the exact fix for each cause — covering Node.js, Python, and Java.",
+};
+
+# InvalidSignatureError on LINE webhook — 7 root causes and fixes
+
+You wired up the webhook. The LINE Developer Console "Verify" button still glows red. Your logs say `InvalidSignatureError` and you've triple-checked the secret.
+
+This post is the decision tree I wish I had the first time I shipped a LINE bot. Seven distinct root causes, each with a one-line symptom and the actual fix — not just "check your secret."
+
+> **Need to see the math?** Paste your real body, header, and secret into the [signature validator](/) — the side-by-side diff shows you exactly where your computed signature diverges from the one LINE sent.
+
+---
+
+## How the signature actually works
+
+LINE computes:
+
+```
+HMAC_SHA256(channelSecret, rawRequestBody) → base64
+```
+
+…and puts that base64 string in the `X-Line-Signature` header. Your server has to compute the same thing over the same bytes with the same secret, and the result has to be byte-equal to the header value. If anything in that pipeline drifts — encoding, framework, proxy — you get a mismatch.
+
+So when validation fails, the failure is almost always in *one* of these spots:
+
+1. The credential you used isn't the channel secret
+2. The bytes you signed aren't the bytes LINE signed
+3. The encoding of your computed value isn't base64
+
+The 7 causes below all map back to one of those three.
+
+---
+
+## 1. Wrong credential: Channel Secret vs Channel Access Token
+
+Most common cause. The LINE Developer Console gives you two long strings:
+
+| Where to find | What it is | Used for |
+|---|---|---|
+| Channel → Basic settings → **Channel secret** | 32 hex chars | Signature verification |
+| Channel → Messaging API → **Channel access token** | very long opaque string | API calls (reply/push) |
+
+They look similar enough that copy-pasting the wrong one is the #1 way to get `InvalidSignatureError`. The access token is for *sending* messages; the secret is for *verifying* incoming ones.
+
+**Fix:** Use the **Channel Secret** under Basic settings. If your secret string is much longer than 32 chars, you grabbed the wrong one.
+
+---
+
+## 2. Express + `body-parser` consumed the raw bytes
+
+```js
+// ❌ broken
+app.use(express.json());
+app.post("/webhook", line.middleware(config), handler);
+```
+
+`express.json()` reads the request stream and replaces `req.body` with the parsed object. By the time `line.middleware()` runs, the raw bytes are gone — it can't compute HMAC over a JavaScript object.
+
+**Fix:** put `line.middleware` before any JSON parser, or scope the parser to other routes:
+
+```js
+// ✅ works
+app.post("/webhook", line.middleware(config), handler);
+app.use(express.json()); // for everything else
+```
+
+If you have to parse JSON yourself before the LINE middleware, capture the raw body:
+
+```js
+app.use(express.raw({ type: "application/json" }));
+app.post("/webhook", (req, res) => {
+  const rawBody = req.body; // Buffer
+  // verify HMAC against rawBody, then JSON.parse(rawBody.toString())
+});
+```
+
+---
+
+## 3. FastAPI auto-parsed the body
+
+Same shape of bug, different framework:
+
+```python
+# ❌ FastAPI has already parsed body into JSON by the time you read it
+@app.post("/webhook")
+async def webhook(payload: dict):
+    verify_signature(payload, ...)  # payload is already a dict — bytes gone
+```
+
+**Fix:** read `request.body()` *as bytes* before doing anything else:
+
+```python
+@app.post("/webhook")
+async def webhook(request: Request):
+    body_bytes = await request.body()
+    signature = request.headers["x-line-signature"]
+    verify_signature(body_bytes, signature, CHANNEL_SECRET)
+    payload = json.loads(body_bytes)  # parse AFTER verification
+```
+
+The official `line-bot-sdk-python` has `WebhookParser.parse(body, signature)` that does this correctly — just make sure you feed it raw bytes, not `await request.json()`.
+
+---
+
+## 4. Spring Boot filter chain consumed the stream
+
+`HttpServletRequest`'s input stream can only be read once. If any filter, interceptor, or `@RequestBody` deserializer reads the body before your signature check, the stream is exhausted and you'll get an empty payload.
+
+A common-but-broken fix is `ContentCachingRequestWrapper` — its `getContentAsByteArray()` only returns bytes *after* the wrapped stream has been consumed downstream, so reading it in your filter first gives you an empty array.
+
+**Fix:** use a custom wrapper that caches the body on construction and re-serves it from the cache:
+
+```java
+public class CachedBodyRequestWrapper extends HttpServletRequestWrapper {
+    private final byte[] body;
+
+    public CachedBodyRequestWrapper(HttpServletRequest req) throws IOException {
+        super(req);
+        this.body = StreamUtils.copyToByteArray(req.getInputStream());
+    }
+
+    public byte[] getBody() { return body; }
+
+    @Override
+    public ServletInputStream getInputStream() {
+        var bais = new ByteArrayInputStream(body);
+        return new ServletInputStream() {
+            @Override public int read() { return bais.read(); }
+            @Override public boolean isFinished() { return bais.available() == 0; }
+            @Override public boolean isReady() { return true; }
+            @Override public void setReadListener(ReadListener l) {}
+        };
+    }
+}
+```
+
+Register it early in the chain so every downstream component reads from the cache:
+
+```java
+@Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class CachingFilter extends OncePerRequestFilter {
+    @Override
+    protected void doFilterInternal(HttpServletRequest req,
+                                    HttpServletResponse res,
+                                    FilterChain chain) throws IOException, ServletException {
+        var wrapped = new CachedBodyRequestWrapper(req);
+        // verify HMAC against wrapped.getBody() here
+        chain.doFilter(wrapped, res);
+    }
+}
+```
+
+Now your signature check sees the exact bytes and `@RequestBody` deserializers still work.
+
+---
+
+## 5. Base64 vs hex confusion
+
+`HMAC_SHA256.digest()` returns raw bytes. You have to encode them — and LINE expects **base64**, not hex.
+
+```js
+// ❌ comparing hex against a base64 header
+const computed = crypto.createHmac("sha256", secret).update(body).digest("hex");
+return computed === receivedSignature; // always false
+```
+
+```js
+// ✅ base64
+const computed = crypto.createHmac("sha256", secret).update(body).digest("base64");
+```
+
+Quick check: a real `X-Line-Signature` is ~44 characters and ends in `=`. If your computed value is 64 lowercase hex chars, you're in this trap.
+
+---
+
+## 6. Trailing newline / re-stringified body
+
+The body has to be byte-identical to what LINE signed. These all silently break that:
+
+- HTTP clients (some) appending `\n` to the request body
+- Loggers pretty-printing JSON (collapsing whitespace changes the bytes)
+- Re-stringifying parsed JSON (`JSON.stringify(JSON.parse(body))` ≠ original)
+- Code that explicitly Unicode-normalizes the body before HMAC (e.g. `unicodedata.normalize("NFC", body)`) — rare, but devastating if you have it
+
+**Fix:** treat the body as opaque bytes from the moment it lands. Never round-trip through a parser before signing. If you need to log, log the byte length and a short hex prefix — not the formatted JSON.
+
+---
+
+## 7. A proxy or CDN modified the request body
+
+You verified the credential, the framework is fine, you're computing base64 — and it still fails in production. Suspect the network layer.
+
+Cloudflare, AWS ALB, nginx with `client_body_buffer_size` quirks, ngrok with `--host-header=rewrite` — anything between LINE and your handler that touches the body will invalidate the signature. Watch for:
+
+- WAF rules that modify request bodies
+- Compression middleware that decompresses then re-encodes
+- Reverse proxies stripping or reordering headers
+- Cloudflare Workers or Transform Rules in your zone that read and re-emit the request body
+
+**Fix:** log the raw body bytes (hex-prefix) at the edge *and* at your origin and diff them. If they differ, the network is the culprit — fix at the proxy layer, not in your code. As a quick check, set up a direct test bypassing the proxy and confirm the signature validates there.
+
+---
+
+## Still stuck? A 30-second checklist
+
+If you've been through the seven above and still seeing red, run through this:
+
+- [ ] You're using **Channel Secret** (32 hex chars), not Channel Access Token
+- [ ] Your handler reads **raw bytes**, not a parsed object
+- [ ] Your comparison encoding is **base64**
+- [ ] The body bytes at your handler match exactly what LINE sent (logged hex prefix on both sides)
+- [ ] You can reproduce locally with `curl -X POST` hitting your endpoint with a captured body + header
+- [ ] You can paste body + header + secret into the [signature validator](/) and see MATCH
+
+If the validator on this site says MATCH but your server says mismatch, the bug is in your server's body-handling — not in the math.
+
+If the validator says mismatch with the values from your server logs, those values disagree with what LINE actually sent — the bug is upstream (network or LINE config).
+
+That split tells you where to look next.
+
+---
+
+*Caught a mistake or have a cause I missed? [Open an issue](https://github.com/naphat-maneechansuk/line-webhook-validator/issues) on the validator's repo — this post lives in the same codebase.*

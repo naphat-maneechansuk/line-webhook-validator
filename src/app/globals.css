@@ -91,3 +91,93 @@ textarea, input { caret-color: #06c755; }
   background: rgba(239, 68, 68, 0.18);
   border-radius: 2px;
 }
+
+.prose-blog { line-height: 1.7; font-size: 16px; }
+.prose-blog h1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #dfe2eb;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+.prose-blog h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #dfe2eb;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #1b1e28;
+}
+.prose-blog h2:first-child,
+.prose-blog h1 + h2,
+.prose-blog hr + h2 { border-top: none; padding-top: 0; margin-top: 1.5rem; }
+.prose-blog h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: #dfe2eb;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+.prose-blog p { margin: 1rem 0; color: #b6bccb; }
+.prose-blog a {
+  color: #4fd884;
+  text-decoration: underline;
+  text-decoration-color: rgba(6, 199, 85, 0.35);
+  text-underline-offset: 3px;
+}
+.prose-blog a:hover { color: #06c755; text-decoration-color: #06c755; }
+.prose-blog strong { color: #dfe2eb; font-weight: 600; }
+.prose-blog code {
+  background: #15171f;
+  border: 1px solid #222633;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.88em;
+  color: #dfe2eb;
+}
+.prose-blog pre {
+  background: #0c0d10;
+  border: 1px solid #1b1e28;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  margin: 1.25rem 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.prose-blog pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: #dfe2eb;
+  font-size: inherit;
+}
+.prose-blog ul, .prose-blog ol { padding-left: 1.5rem; margin: 1rem 0; color: #b6bccb; }
+.prose-blog li { margin: 0.4rem 0; }
+.prose-blog li input[type="checkbox"] { margin-right: 0.5rem; }
+.prose-blog blockquote {
+  border-left: 3px solid #06c755;
+  background: rgba(6, 199, 85, 0.05);
+  padding: 0.75rem 1rem;
+  margin: 1.25rem 0;
+  color: #b6bccb;
+  border-radius: 0 6px 6px 0;
+}
+.prose-blog blockquote p { margin: 0.25rem 0; }
+.prose-blog table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  font-size: 14px;
+}
+.prose-blog th, .prose-blog td {
+  border: 1px solid #222633;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.prose-blog th { background: #15171f; color: #dfe2eb; font-weight: 600; }
+.prose-blog hr { border: 0; border-top: 1px solid #1b1e28; margin: 2.25rem 0 0; }
+.prose-blog em { color: #b6bccb; font-style: italic; }

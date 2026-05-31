@@ -2,12 +2,14 @@ import { Pill } from "./atoms";
 import type { Strings } from "@/lib/strings";
 
 function FunnelCard({
+  href,
   label,
   title,
   sub,
   cta,
   tone = "line",
 }: {
+  href: string;
   label: string;
   title: string;
   sub: string;
@@ -20,7 +22,7 @@ function FunnelCard({
       : "group-hover:border-line/40";
   return (
     <a
-      href="#"
+      href={href}
       className="group block rounded-xl border border-ink-800 bg-ink-900/40 p-5 transition hover:bg-ink-900/70 hover:-translate-y-[1px]"
     >
       <div
@@ -57,6 +59,7 @@ export function FooterFunnel({ L }: { L: Strings }) {
       <div className="max-w-[1180px] mx-auto px-6 md:px-8 py-10">
         <div className="grid md:grid-cols-1 gap-4">
           <FunnelCard
+            href="/blog/invalid-signature-error"
             label="docs"
             title={L.footStruggle}
             cta={L.footStruggleCta}
