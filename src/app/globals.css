@@ -43,6 +43,16 @@ body {
 ::selection { background: rgba(6, 199, 85, 0.35); }
 textarea, input { caret-color: #06c755; }
 
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: #222633;
+  border-radius: 8px;
+  border: 2px solid #0c0d10;
+}
+*::-webkit-scrollbar-thumb:hover { background: #2c3140; }
+* { scrollbar-color: #222633 transparent; scrollbar-width: thin; }
+
 .focus-line:focus {
   outline: none;
   box-shadow: 0 0 0 1px rgba(6, 199, 85, 0.45), 0 0 0 4px rgba(6, 199, 85, 0.12);
