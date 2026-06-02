@@ -159,7 +159,7 @@ export function Validator({
         <div className="mt-2 flex items-start gap-2 rounded-md border border-line/30 bg-line-soft px-2.5 py-2 text-[11.5px] leading-relaxed">
           <span
             className="flex-none inline-flex items-center justify-center w-4 h-4 mt-[1px] rounded-full"
-            style={{ background: "rgba(6,199,85,0.18)", color: "#06C755" }}
+            style={{ background: "rgba(22,163,74,0.18)", color: "#16a34a" }}
           >
             <Icon.Lock width="10" height="10" />
           </span>

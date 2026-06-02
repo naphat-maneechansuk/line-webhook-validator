@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Pill } from "./atoms";
 import type { Strings } from "@/lib/strings";
 
@@ -72,6 +73,10 @@ export function FooterFunnel({ L }: { L: Strings }) {
             <Logo />
             <span>MIT licensed</span>
             <span>·</span>
+            <Link href="/privacy" className="hover:text-ink-200">
+              {L.privacy}
+            </Link>
+            <span>·</span>
             <a
               href="https://github.com/naphat-maneechansuk/line-webhook-validator/issues"
               target="_blank"
@@ -82,6 +87,9 @@ export function FooterFunnel({ L }: { L: Strings }) {
             </a>
           </div>
         </div>
+        <p className="mt-4 text-[11px] leading-relaxed text-ink-500">
+          {L.notAffiliated} {L.noWarranty}
+        </p>
       </div>
     </footer>
   );

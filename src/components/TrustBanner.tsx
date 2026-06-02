@@ -8,7 +8,7 @@ export function TrustBanner({ L }: { L: Strings }) {
         <div className="flex items-center gap-2.5 text-ink-300">
           <span
             className="inline-flex items-center justify-center w-6 h-6 rounded-md text-line"
-            style={{ background: "rgba(6,199,85,0.10)" }}
+            style={{ background: "rgba(22,163,74,0.10)" }}
           >
             <Icon.Lock />
           </span>

@@ -57,6 +57,11 @@ export const STRINGS = {
     footStruggleCta: "7 common causes →",
     footStuck: "Stuck on a LINE OA project?",
     footStuckCta: "Free 30-min consult →",
+    privacy: "Privacy",
+    notAffiliated:
+      "Not affiliated with, endorsed by, or associated with LY Corporation. “LINE” is a trademark of LY Corporation.",
+    noWarranty:
+      "Provided as-is for debugging. Always verify against the official LINE Messaging API docs.",
     step1: "UTF-8 encode body",
     step1Sub: "Convert the raw request body to a byte array.",
     step2: "HMAC-SHA256",
@@ -122,6 +127,11 @@ export const STRINGS = {
     footStruggleCta: "7 สาเหตุยอดฮิต →",
     footStuck: "ติดปัญหากับโปรเจกต์ LINE OA?",
     footStuckCta: "ปรึกษาฟรี 30 นาที →",
+    privacy: "ความเป็นส่วนตัว",
+    notAffiliated:
+      "ไม่มีความเกี่ยวข้อง ไม่ได้รับการรับรอง และไม่เป็นส่วนหนึ่งของ LY Corporation “LINE” เป็นเครื่องหมายการค้าของ LY Corporation",
+    noWarranty:
+      "ให้บริการแบบ as-is เพื่อการ debug เท่านั้น ควรตรวจสอบกับเอกสาร LINE Messaging API อย่างเป็นทางการเสมอ",
     step1: "เข้ารหัส body เป็น UTF-8",
     step1Sub: "แปลง raw body เป็น byte array",
     step2: "HMAC-SHA256",
